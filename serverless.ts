@@ -34,6 +34,18 @@ const serverlessConfiguration: AWS = {
         }
       ]
     },
+    listTodos: {
+      handler: "src/functions/listTodos.handler",
+      events: [
+        {
+          http: {
+            path: "/todos/{userId}",
+            method: "get",
+            cors: true,
+          }
+        }
+      ]
+    },
   },
   package: { individually: true },
   custom: {
@@ -67,11 +79,37 @@ const serverlessConfiguration: AWS = {
               AttributeName: "id",
               AttributeType: "S"
             },
+            {
+              AttributeName: "user_id",
+              AttributeType: "S"
+            },
           ],
           KeySchema: [
             {
               AttributeName: "id",
               KeyType: "HASH",
+            },
+            {
+              AttributeName: "user_id",
+              KeyType: "RANGE",
+            },
+          ],
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: "UserIdIndex",
+              KeySchema: [
+                {
+                  AttributeName: "user_id",
+                  KeyType: "HASH"
+                },
+              ],
+              Projection: {
+                ProjectionType: "ALL"
+              },
+              ProvisionedThroughput: {
+                ReadCapacityUnits: 5,
+                WriteCapacityUnits: 5,
+              },
             }
           ],
           ProvisionedThroughput: {
