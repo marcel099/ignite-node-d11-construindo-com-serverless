@@ -21,7 +21,20 @@ const serverlessConfiguration: AWS = {
     },
   },
   // import the function via paths
-  functions: { },
+  functions: {
+    createTodo: {
+      handler: "src/functions/createTodo.handler",
+      events: [
+        {
+          http: {
+            path: "/todos/{userId}",
+            method: "post",
+            cors: true,
+          }
+        }
+      ]
+    },
+  },
   package: { individually: true },
   custom: {
     esbuild: {
@@ -41,7 +54,33 @@ const serverlessConfiguration: AWS = {
         inMemory: true,
         migrate: true
       }
-    }
+    },
+  },
+  resources: {
+    Resources: {
+      dbCertificateUsers: {
+        Type: "AWS::DynamoDB::Table",
+        Properties: {
+          TableName: "todos",
+          AttributeDefinitions: [
+            {
+              AttributeName: "id",
+              AttributeType: "S"
+            },
+          ],
+          KeySchema: [
+            {
+              AttributeName: "id",
+              KeyType: "HASH",
+            }
+          ],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 5,
+            WriteCapacityUnits: 5,
+          },
+        }
+      }
+    },
   },
 };
 
